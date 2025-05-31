@@ -66,7 +66,7 @@ services:
     networks:
       - veille_net
     ports:
-      - "3316:3306"
+      - "3336:3306"
     volumes:
       - db_data:/var/lib/mysql
     environment:
