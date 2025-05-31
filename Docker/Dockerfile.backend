@@ -1,0 +1,10 @@
+FROM maven:3.9.9 as builder
+WORKDIR /build
+COPY VeilleTechnoBack/pom.xml ./
+COPY VeilleTechnoBack/src ./src
+RUN mvn clean package -DskipTests
+FROM openjdk:21-jdk-slim
+WORKDIR /app
+COPY --from=builder /build/target/*.jar app.jar
+EXPOSE 8080
+CMD ["java", "-jar", "app.jar" , "--spring.profiles.active=docker"]

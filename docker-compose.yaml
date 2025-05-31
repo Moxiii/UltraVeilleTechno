@@ -1,0 +1,92 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --api.dashboard=true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    networks:
+      - veille_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.entrypoints=web"
+  backend:
+    container_name: Backend
+    build:
+      context: ..
+      dockerfile: Docker/Dockerfile.backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      - MYSQL_HOST=db
+    env_file:
+      - ./Docker/.env
+    networks:
+      - veille_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
+
+  frontend:
+    container_name: Fronted
+    build:
+      context: ..
+      dockerfile: Docker/Dockerfile.frontend
+    restart: unless-stopped
+    networks:
+      - veille_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`veille.localhost`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=5173"
+  mysql:
+    container_name: DataBase
+    image: mysql:8.0.19
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent" ]
+      interval: 3s
+      retries: 5
+      start_period: 30s
+    networks:
+      - veille_net
+    ports:
+      - "3316:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: veilleTechno
+      MYSQL_USER: veilleTechno
+      MYSQL_ROOT_PASSWORD: veilleTechno
+      MYSQL_PASSWORD: root
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "2001:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    networks:
+      - veille_net
+volumes:
+  db_data:
+  letsencrypt: {}
+networks:
+  veille_net:
+    driver: bridge
