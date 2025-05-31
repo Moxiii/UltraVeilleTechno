@@ -23,11 +23,11 @@ services:
   backend:
     container_name: Backend
     build:
-      context: ..
+      context: .
       dockerfile: Docker/Dockerfile.backend
     restart: unless-stopped
     depends_on:
-      mysql:
+      db:
         condition: service_healthy
     environment:
       - MYSQL_HOST=db
@@ -42,9 +42,9 @@ services:
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
 
   frontend:
-    container_name: Fronted
+    container_name: Frontend
     build:
-      context: ..
+      context: .
       dockerfile: Docker/Dockerfile.frontend
     restart: unless-stopped
     networks:
@@ -53,8 +53,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`veille.localhost`)"
       - "traefik.http.routers.frontend.entrypoints=web"
-      - "traefik.http.services.frontend.loadbalancer.server.port=5173"
-  mysql:
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+  db:
     container_name: DataBase
     image: mysql:8.0.19
     restart: unless-stopped
@@ -73,7 +73,7 @@ services:
       MYSQL_DATABASE: veilleTechno
       MYSQL_USER: veilleTechno
       MYSQL_ROOT_PASSWORD: veilleTechno
-      MYSQL_PASSWORD: root
+      MYSQL_PASSWORD: veilleTechno
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     restart: unless-stopped
