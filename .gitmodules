@@ -1,0 +1,6 @@
+[submodule "VeilleTechnoBack"]
+	path = VeilleTechnoBack
+	url = git@github.com:Moxiii/VeilleTechnoBack.git
+[submodule "VeilleTechnoFront"]
+	path = VeilleTechnoFront
+	url = git@github.com:Moxiii/VeilleTechnoFront.git
