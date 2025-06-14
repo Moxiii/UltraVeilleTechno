@@ -20,6 +20,7 @@ services:
       - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.routers.traefik.entrypoints=web"
+
   backend:
     container_name: Backend
     build:
@@ -93,12 +94,14 @@ services:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:25.0.0
     command: ["start-dev" , "--import-realm"]
+    depends_on:
+      - keycloak_db
     environment:
-      KC_DB : postgres
-      KC_DB_USERNAME : keycloak
-      KC_DB_URL : jdbc:prostgresql://keycloak-db/keycloak
-      KEYCLOAK_ADMIN : admin
-      KEYCLOAK_ADMIN_PASSWORD : admin
+      KC_DB: postgres
+      KC_DB_USERNAME: keycloak
+      KC_DB_URL: jdbc:postgresql://keycloak_db/keycloak
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm.json:ro
     networks:
@@ -106,11 +109,26 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.keycloak.rule=Host(`auth.localhost`)"
-      - "traefik.http.routers.keycloak.entrypoints=web"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+
+  keycloak_db:
+    image: postgres:16
+    container_name: keycloak_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    networks: [ veille_net ]
+    volumes:
+      - keycloak_data:/var/lib/postgresql/data
+
+
 volumes:
   db_data:
   letsencrypt: {}
   node_modules: {}
+  keycloak_data: {}
 networks:
   veille_net:
     driver: bridge
