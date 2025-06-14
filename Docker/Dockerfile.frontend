@@ -6,7 +6,7 @@ RUN rm -rf node_modules package-lock.json yarn.lock || true
 RUN npm install
 RUN npm install rollup
 RUN npm install @rollup/rollup-linux-x64-gnu
-RUN npm install sass
+RUN npm install web-vitals
 FROM node:20
 WORKDIR /app
 
