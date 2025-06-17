@@ -7,6 +7,7 @@ services:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --api.dashboard=true
+      - --entrypoints.websecure.http.tls=true
     ports:
       - "80:80"
       - "443:443"
@@ -20,6 +21,7 @@ services:
       - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.routers.traefik.entrypoints=web"
+
 
   backend:
     container_name: Backend
@@ -56,6 +58,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`veille.localhost`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=5173"
+      - "traefik.http.routers.frontend.entrypoints=web"
     volumes:
       - ./VeilleTechnoFront:/app
       - node_modules:/app/node_modules
@@ -119,8 +122,11 @@ services:
       KC_DB_URL: jdbc:postgresql://keycloak_db:5432/keycloak
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: auth.localhost
+      KC_HOSTNAME_STRICT: "false"
       KC_HTTP_COOKIE_SAME_SITE: none
-      KC_HTTP_COOKIE_SECURE: false
+      KC_HTTP_COOKIE_SECURE: "false"
+      KC_PROXY: edge
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm.json:ro
     networks: [ veille_net ]

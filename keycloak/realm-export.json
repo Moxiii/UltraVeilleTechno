@@ -9,6 +9,9 @@
       "redirectUris": [
         "http://veille.localhost/*"
       ],
+      "webOrigins": [
+        "http://veille.localhost"
+      ],
       "publicClient": true,
       "protocol": "openid-connect"
     }
