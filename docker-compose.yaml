@@ -45,7 +45,9 @@ services:
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
     volumes:
       - ./VeilleTechnoBack:/app
-
+      - ./m2-repo:/root/.m2/repository
+    extra_hosts:
+      - "keycloak.localhost:host-gateway"
   frontend:
     container_name: Frontend
     build:
@@ -96,7 +98,8 @@ services:
   keycloak_db:
     image: postgres:16
     restart: unless-stopped
-    networks: [ veille_net ]
+    networks:
+      - veille_net
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
@@ -122,17 +125,18 @@ services:
       KC_DB_URL: jdbc:postgresql://keycloak_db:5432/keycloak
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HOSTNAME: auth.localhost
+      KC_HOSTNAME: keycloak
       KC_HOSTNAME_STRICT: "false"
       KC_HTTP_COOKIE_SAME_SITE: none
       KC_HTTP_COOKIE_SECURE: "false"
       KC_PROXY: edge
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm.json:ro
-    networks: [ veille_net ]
+    networks:
+      - veille_net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.keycloak.rule=Host(`auth.localhost`)"
+      - "traefik.http.routers.keycloak.rule=Host(`keycloak.localhost`)"
       - "traefik.http.routers.keycloak.entrypoints=web"
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
 
