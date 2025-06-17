@@ -12,14 +12,21 @@
       "webOrigins": [
         "http://veille.localhost"
       ],
+      "directAccessGrantsEnabled": true,
       "publicClient": true,
       "protocol": "openid-connect"
     }
+
   ],
   "users": [
     {
       "username": "moxi",
+      "email": "moxi@example.com",
+      "emailVerified": true,
+      "firstName":"Maxime",
+      "lastName":"Maxime",
       "enabled": true,
+      "requiredActions": [],
       "credentials": [
         {
           "type": "password",
