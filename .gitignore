@@ -1,5 +1,7 @@
-node_modules
+**/node_modules
+VeilleTechnoFront/node_modules
 .git
 *.log
 .env
 /.idea
+m2-repo

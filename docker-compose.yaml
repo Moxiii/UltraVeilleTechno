@@ -41,7 +41,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`api.localhost`) "
-      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
     volumes:
       - ./VeilleTechnoBack:/app
@@ -137,7 +138,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.keycloak.rule=Host(`keycloak.localhost`)"
-      - "traefik.http.routers.keycloak.entrypoints=web"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
 
 
