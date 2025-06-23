@@ -6,3 +6,7 @@ VeilleTechnoFront/node_modules
 /.idea
 m2-repo
 certs
+**/certs/
+**/localhost-cert.pem
+**/localhost-key.pem
+/certs/
