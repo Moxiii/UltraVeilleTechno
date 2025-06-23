@@ -8,19 +8,28 @@ services:
       - --providers.docker.exposedbydefault=false
       - --api.dashboard=true
       - --entrypoints.websecure.http.tls=true
+#      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+#      - --certificatesresolvers.myresolver.acme.email=contact@x.fr
+#      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --providers.file.directory=/etc/traefik/dynamic
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - letsencrypt:/letsencrypt
+#      - letsencrypt:/letsencrypt
+      - ./certs:/certs:ro
+      - ./traefik_dynamic:/etc/traefik/dynamic:ro
     networks:
       - veille_net
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
       - "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls=true"
 
 
   backend:
@@ -40,9 +49,11 @@ services:
       - veille_net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`api.localhost`) "
-      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
+
     volumes:
       - ./VeilleTechnoBack:/app
       - ./m2-repo:/root/.m2/repository
@@ -60,7 +71,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`veille.localhost`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=5173"
-      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
     volumes:
       - ./VeilleTechnoFront:/app
       - node_modules:/app/node_modules
@@ -128,7 +140,7 @@ services:
       KC_HOSTNAME: keycloak
       KC_HOSTNAME_STRICT: "false"
       KC_HTTP_COOKIE_SAME_SITE: none
-      KC_HTTP_COOKIE_SECURE: "false"
+      KC_HTTP_COOKIE_SECURE: "true"
       KC_PROXY: edge
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm.json:ro
@@ -137,8 +149,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.keycloak.rule=Host(`keycloak.localhost`)"
-      - "traefik.http.routers.keycloak.entrypoints=web"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+      - "traefik.http.routers.keycloak.tls=true"
 
 
 volumes:
@@ -148,4 +161,5 @@ volumes:
   keycloak_data: {}
 networks:
   veille_net:
-    driver: bridge
+    driver:
+      bridge
