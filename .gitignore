@@ -10,3 +10,4 @@ certs
 **/localhost-cert.pem
 **/localhost-key.pem
 /certs/
+**/.env

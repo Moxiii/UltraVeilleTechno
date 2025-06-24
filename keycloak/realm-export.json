@@ -14,7 +14,11 @@
       ],
       "directAccessGrantsEnabled": true,
       "publicClient": true,
-      "protocol": "openid-connect"
+      "protocol": "openid-connect",
+      "attributes": {
+        "access.token.lifespan": "86400",
+        "refresh.token.lifespan": "2592000"
+      }
     }
 
   ],
