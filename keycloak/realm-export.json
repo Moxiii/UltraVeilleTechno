@@ -21,23 +21,5 @@
       }
     }
 
-  ],
-  "users": [
-    {
-      "username": "moxi",
-      "email": "moxi@example.com",
-      "emailVerified": true,
-      "firstName":"Maxime",
-      "lastName":"Maxime",
-      "enabled": true,
-      "requiredActions": [],
-      "credentials": [
-        {
-          "type": "password",
-          "value": "password123",
-          "temporary": false
-        }
-      ]
-    }
   ]
 }
