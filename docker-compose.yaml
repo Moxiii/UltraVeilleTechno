@@ -125,7 +125,12 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:25.0.0
-    command: [ "start-dev", "--import-realm" ]
+    command: [
+      "start-dev",
+      "--import-realm",
+      "--hostname=keycloak",
+      "--spi-x509cert-lookup-provider=default"
+    ]
     restart: unless-stopped
     depends_on:
       keycloak_db:
@@ -137,10 +142,11 @@ services:
       KC_DB_URL: jdbc:postgresql://keycloak_db:5432/keycloak
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HOSTNAME: keycloak
-      KC_HOSTNAME_STRICT: "false"
       KC_HTTP_COOKIE_SAME_SITE: none
       KC_HTTP_COOKIE_SECURE: "true"
+      KC_HOSTNAME: keycloak
+      KC_HOSTNAME_STRICT: "false"
+      KC_PROXY_HEADERS: xforwarded
       KC_PROXY: edge
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm.json:ro
