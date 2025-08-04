@@ -35,8 +35,9 @@ services:
   backend:
     container_name: Backend
     build:
-      context: .
-      dockerfile: Docker/Dockerfile.backend
+      context: ./VeilleTechnoBack
+      dockerfile: ../Docker/Dockerfile.backend
+#   image: veille-back:latest
     restart: unless-stopped
     depends_on:
       db:
@@ -61,9 +62,10 @@ services:
       - "keycloak.localhost:host-gateway"
   frontend:
     container_name: Frontend
+#    image: veille-front:latest
     build:
-      context: .
-      dockerfile: Docker/Dockerfile.frontend
+      context: ./VeilleTechnoFront
+      dockerfile: ../Docker/Dockerfile.frontend
     restart: unless-stopped
     networks:
       - veille_net
