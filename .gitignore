@@ -12,3 +12,5 @@ certs
 /certs/
 **/.env
 
+./vscode/
+.vscode/
