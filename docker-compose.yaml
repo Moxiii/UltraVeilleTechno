@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.0
+    image: traefik:v3.6
     restart: unless-stopped
     command:
       - --entrypoints.web.address=:80
@@ -9,9 +9,9 @@ services:
       - --providers.docker.exposedbydefault=false
       - --api.dashboard=true
       - --entrypoints.websecure.http.tls=true
-#      - --certificatesresolvers.myresolver.acme.tlschallenge=true
-#      - --certificatesresolvers.myresolver.acme.email=contact@x.fr
-#      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+      #      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      #      - --certificatesresolvers.myresolver.acme.email=contact@x.fr
+      #      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
       - --entrypoints.web.http.redirections.entryPoint.to=websecure
       - --entrypoints.web.http.redirections.entryPoint.scheme=https
       - --providers.file.directory=/etc/traefik/dynamic
@@ -20,7 +20,7 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-#      - letsencrypt:/letsencrypt
+      #      - letsencrypt:/letsencrypt
       - ./certs:/certs:ro
       - ./traefik_dynamic:/etc/traefik/dynamic:ro
     networks:
@@ -31,14 +31,17 @@ services:
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.routers.traefik.entrypoints=websecure"
       - "traefik.http.routers.traefik.tls=true"
-
+    user: "0:1001"
+    group_add:
+      - 1001
+      - 999
 
   backend:
     container_name: Backend
     build:
       context: ./VeilleTechnoBack
       dockerfile: ../Docker/Dockerfile.backend
-#   image: veille-back:latest
+    #   image: veille-back:latest
     restart: unless-stopped
     depends_on:
       db:
@@ -63,7 +66,7 @@ services:
       - "keycloak.localhost:host-gateway"
   frontend:
     container_name: Frontend
-#    image: veille-front:latest
+    #    image: veille-front:latest
     build:
       context: ./VeilleTechnoFront
       dockerfile: ../Docker/Dockerfile.frontend
@@ -84,7 +87,7 @@ services:
     image: mysql:8.0.19
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       interval: 3s
       retries: 5
       start_period: 30s
@@ -122,18 +125,19 @@ services:
     volumes:
       - keycloak_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U keycloak" ]
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
       interval: 5s
       retries: 10
 
   keycloak:
     image: quay.io/keycloak/keycloak:25.0.0
-    command: [
-      "start-dev",
-      "--import-realm",
-      "--hostname=keycloak",
-      "--spi-x509cert-lookup-provider=default"
-    ]
+    command:
+      [
+        "start-dev",
+        "--import-realm",
+        "--hostname=keycloak",
+        "--spi-x509cert-lookup-provider=default",
+      ]
     restart: unless-stopped
     depends_on:
       keycloak_db:
@@ -162,7 +166,6 @@ services:
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
       - "traefik.http.routers.keycloak.tls=true"
 
-
 volumes:
   db_data:
   letsencrypt: {}
@@ -170,5 +173,4 @@ volumes:
   keycloak_data: {}
 networks:
   veille_net:
-    driver:
-      bridge
+    driver: bridge
